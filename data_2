@@ -1,0 +1,73 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+%matplotlib inline
+plt.style.use("fivethirtyeight")
+sns.set_style({'font.sans-serif':['SimHei','Arial']})
+original=pd.read_csv('C:\\Users\\1994y\\Desktop\\Salaries.csv')
+original.info()
+objlist = ['BasePay', 'OvertimePay', 'OtherPay', 'Benefits']
+for obj in objlist:
+    original[obj] = pd.to_numeric(original[obj], errors = 'coerce')
+original.info()
+original['Year'].unique()
+original.groupby(["Year"])[["BasePay"]].mean()
+a=original.loc[original["Year"]==2011]
+b=original.loc[original["Year"]==2012]
+c=original.loc[original["Year"]==2013]
+d=original.loc[original["Year"]==2014]
+a_2011=a.groupby(["JobTitle"])[["TotalPay"]].mean().sort_values(by="TotalPay",ascending=False).reset_index()
+a_2011['JobTitle']=a_2011['JobTitle'].str.capitalize()
+b_2012=b.groupby(["JobTitle"])[["TotalPay"]].mean().sort_values(by="TotalPay",ascending=False).reset_index()
+c_2013=c.groupby(["JobTitle"])[["TotalPay"]].mean().sort_values(by="TotalPay",ascending=False).reset_index()
+d_2014=d.groupby(["JobTitle"])[["TotalPay"]].mean().sort_values(by="TotalPay",ascending=False).reset_index()
+f, axs = plt.subplots(2,2,figsize=(20,15))
+
+sns.barplot(x=a_2011['JobTitle'].head(5), y=a_2011['TotalPay'].head(5), palette="Greens_d",data=a_2011, ax=axs[0,0])
+axs[0,0].set_title('2011年SF工资top5',fontsize=15)
+axs[0,0].set_xlabel('工作')
+axs[0,0].set_ylabel('平均薪资')
+
+sns.barplot(x=b_2012['JobTitle'].head(5), y=b_2012['TotalPay'].head(5), palette="Greens_d",data=b_2012, ax=axs[0,1])
+axs[0,1].set_title('2012年SF工资top5',fontsize=15)
+axs[0,1].set_xlabel('工作')
+axs[0,1].set_ylabel('平均薪资')
+
+sns.barplot(x=c_2013['JobTitle'].head(5), y=c_2013['TotalPay'].head(5), palette="Greens_d",data=c_2013.head(5), ax=axs[1,0])
+axs[1,0].set_title('2013年SF工资top5',fontsize=15)
+axs[1,0].set_xlabel('工作')
+axs[1,0].set_ylabel('平均薪资')
+
+sns.barplot(x=d_2014['JobTitle'].head(5), y=d_2014['TotalPay'].head(5), palette="Greens_d",data=d_2014.head(5), ax=axs[1,1])
+axs[1,1].set_title('2014年SF工资top5',fontsize=15)
+axs[1,1].set_xlabel('工作')
+axs[1,1].set_ylabel('平均薪资')
+job_list=["Chief of Police","Chief, Fire Department","Gen Mgr, Public Trnsp Dept","Executive Contract Employee","Asst Chf of Dept (Fire Dept)"]
+def check_job(x):
+    salary_dict={}
+    for i in range(len(x["JobTitle"])):
+        if x.loc[i,'JobTitle'] in job_list:
+            salary_dict[x.loc[i,'JobTitle']]=x.loc[i,'TotalPay']
+    return salary_dict    
+d1=check_job(a_2011)
+d2=check_job(b_2012)
+d3=check_job(c_2013)
+d4=check_job(d_2014)
+salary={'Chief of Police':[321552.11,339282.07,326716.76],
+ 'Chief, Fire Department':[ 314759.6,336922.01,326233.44],
+ 'Gen Mgr, Public Trnsp Dept': [294000.17,305307.89,294000.18],
+ 'Executive Contract Employee': [273776.24,207269.5166666667,278544.71],
+ 'Asst Chf of Dept (Fire Dept)': [270674.81666666665,294846.6766666667,279768.9583333334]}
+df=pd.DataFrame(salary,index=["2012","2013","2014"])
+df.plot()
+original[original['TotalPayBenefits'] == original['TotalPayBenefits'].min()]
+original[original['OvertimePay'] == original['OvertimePay'].max()]
+original.groupby('Status')['BasePay'].mean()
+original.corr()
+del original["Notes"]
+plt.figure(figsize=(20,20))
+plt.rcParams['font.sans-serif']=['SimHei'] 
+plt.rcParams['axes.unicode_minus']=False
+sns.heatmap(original.corr(),linewidths=0.1,vmax=1.0, square=True, linecolor='white', annot=True)
+plt.show()
